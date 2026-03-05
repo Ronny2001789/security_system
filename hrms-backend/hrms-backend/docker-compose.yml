@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -7,18 +5,24 @@ services:
     environment:
       POSTGRES_DB: hrms
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: moronza2001
     ports:
       - "5432:5432"
+    healthcheck:                  # ← Add this block
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
     image: hrms-backend
     container_name: hrms-container
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy   # ← Change to this
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hrms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
     ports:
-      - "8080:8080"
+      - "8081:8081"
